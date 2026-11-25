@@ -24,7 +24,7 @@
 
 - **Frontend**: React, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Router, SheetJS (`xlsx`)
 - **Backend & Scheduling**: Supabase (PostgreSQL, Row-Level Security, Edge Functions)
-- **Notifications**: Web Push API, Service Workers (`public/sw.js`), Meta WhatsApp Cloud API / SMS Gateway architecture
+- **Notifications**: Web Push API .
 
 ## Getting Started
 
