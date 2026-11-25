@@ -36,7 +36,10 @@ export const notificationService = {
     if (!('serviceWorker' in navigator)) return null;
     try {
       const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-      await navigator.serviceWorker.ready;
+      await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise((resolve) => setTimeout(resolve, 1500))
+      ]);
       return reg;
     } catch (err) {
       console.warn('ServiceWorker registration note:', err);
@@ -135,13 +138,16 @@ export const notificationService = {
 
     try {
       if ('serviceWorker' in navigator) {
-        const reg = await navigator.serviceWorker.ready;
+        const reg = await Promise.race([
+          navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(() => navigator.serviceWorker.ready),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 1000))
+        ]);
         if (reg && reg.showNotification) {
           await reg.showNotification(title, {
             body,
             icon: '/vite.svg',
             badge: '/vite.svg',
-            tag: 'test-reminder',
+            tag: `test-reminder-${Date.now()}`,
             data: { url: '/dashboard' }
           });
 
@@ -159,7 +165,8 @@ export const notificationService = {
       // fallback to window Notification
     }
 
-    new Notification(title, { body, icon: '/vite.svg' });
+    // Direct browser Notification fallback (instant, never hangs)
+    new Notification(title, { body, icon: '/vite.svg', tag: `test-reminder-${Date.now()}` });
     await dataService.addNotificationLog({
       user_id: userId,
       channel: 'test',
