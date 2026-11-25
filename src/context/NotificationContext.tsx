@@ -21,7 +21,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const { todayLectures, isHolidayToday } = useTimetable();
+  const { todayLectures, nextLecture, currentLecture, isHolidayToday } = useTimetable();
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
   const [logs, setLogs] = useState<NotificationLog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -187,7 +187,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const sendTestAlert = async (channel: 'browser_push' | 'whatsapp' | 'sms' = 'browser_push') => {
     if (!user) return { delivered: false, preview: '' };
     const recipient = channel === 'whatsapp' ? preferences?.whatsapp_number : preferences?.sms_number;
-    const res = await notificationService.sendTestNotification(user.id, channel, recipient);
+    const targetLecture = nextLecture || currentLecture || null;
+    const res = await notificationService.sendTestNotification(user.id, channel, recipient, targetLecture);
     if (res.delivered) {
       await refreshLogs();
     }

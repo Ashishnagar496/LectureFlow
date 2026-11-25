@@ -94,10 +94,26 @@ export const notificationService = {
   async sendTestNotification(
     userId: string,
     channel: 'browser_push' | 'whatsapp' | 'sms' = 'browser_push',
-    recipientNumber?: string
+    recipientNumber?: string,
+    sampleLecture?: {
+      subject_name: string;
+      classroom?: string;
+      faculty_name?: string;
+      startsInMinutes?: number;
+    } | null
   ): Promise<{ delivered: boolean; preview: string }> {
-    const title = 'LectureFlow: Upcoming Lecture Alert';
-    const body = 'Database Management Systems starts in 10 minutes at Room 301 (Dr. Ramesh Sharma).';
+    const title = sampleLecture
+      ? `Upcoming: ${sampleLecture.subject_name}`
+      : 'LectureFlow: Alerts Active';
+    const body = sampleLecture
+      ? `${sampleLecture.subject_name} ${
+          sampleLecture.startsInMinutes && sampleLecture.startsInMinutes > 0
+            ? `starts in ${sampleLecture.startsInMinutes} min`
+            : 'is scheduled'
+        } at ${sampleLecture.classroom || 'Classroom'}${
+          sampleLecture.faculty_name ? ` (${sampleLecture.faculty_name})` : ''
+        }.`
+      : 'Browser push alerts are active. You will be notified before your next scheduled lecture.';
 
     if (channel === 'whatsapp') {
       // Log WhatsApp dispatch preview (actual delivery occurs via Edge Function + Meta Cloud API)
