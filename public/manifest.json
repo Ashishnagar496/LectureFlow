@@ -1,0 +1,17 @@
+{
+  "name": "LectureFlow — Academic Schedule & Reminders",
+  "short_name": "LectureFlow",
+  "description": "Minimal academic timetable, live lecture flow, and WhatsApp/Push reminders for college students.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0B1120",
+  "theme_color": "#0B1120",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
