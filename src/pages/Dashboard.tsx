@@ -34,6 +34,8 @@ export const Dashboard: React.FC = () => {
 
   const { preferences } = useNotification();
 
+  const currentBreak = timelineItems.find((item) => item.type === 'break' && item.status === 'BREAK') || null;
+
   const daysOfWeek = [
     { num: 1, label: 'Mon' },
     { num: 2, label: 'Tue' },
@@ -159,6 +161,37 @@ export const Dashboard: React.FC = () => {
                 />
               </div>
             </div>
+          ) : currentBreak ? (
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-[#22C55E]"></span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#F9FAFB]">
+                    Ongoing Break
+                  </span>
+                </div>
+                <span className="text-xs font-normal text-[#9CA3AF]">
+                  {currentBreak.remainingMinutes} min remaining
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+                <h2 className="text-base sm:text-lg font-bold text-[#F9FAFB]">
+                  {currentBreak.subject_name}
+                </h2>
+                <span className="text-xs font-normal text-[#9CA3AF]">
+                  {currentBreak.start_time} – {currentBreak.end_time}
+                  {nextLecture ? ` • Next: ${nextLecture.subject_name} (${nextLecture.classroom || 'Room'})` : ''}
+                </span>
+              </div>
+
+              <div className="w-full bg-[#1F2937] rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-[#2563EB] h-full rounded-full transition-all duration-500"
+                  style={{ width: `${currentBreak.progressPercent || 20}%` }}
+                />
+              </div>
+            </div>
           ) : isDayFinished ? (
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-[#6B7280] shrink-0" />
@@ -243,6 +276,8 @@ export const Dashboard: React.FC = () => {
           <div className="relative pl-6 sm:pl-7 space-y-4 before:content-[''] before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-px before:bg-brand-border">
             {timelineItems.map((item) => {
               const isOngoing = item.status === 'ONGOING';
+              const isActiveBreak = item.type === 'break' && item.status === 'BREAK';
+              const isHighlighted = isOngoing || isActiveBreak;
               const isCompleted = item.status === 'COMPLETED';
               const isBreak = item.type === 'break';
 
@@ -251,7 +286,7 @@ export const Dashboard: React.FC = () => {
                   {/* Crisp Timeline Dot (No neon glow) */}
                   <div
                     className={`absolute -left-[1.45rem] sm:-left-[1.7rem] top-4 w-3 h-3 rounded-full border-2 ${
-                      isOngoing
+                      isHighlighted
                         ? 'bg-[#22C55E] border-[#111827] ring-2 ring-[#22C55E]/30'
                         : isCompleted
                         ? 'bg-[#6B7280] border-[#111827]'
@@ -263,7 +298,7 @@ export const Dashboard: React.FC = () => {
 
                   <div
                     className={`p-4 rounded-xl border transition-colors ${
-                      isOngoing
+                      isHighlighted
                         ? 'bg-[#166534]/20 border-[#22C55E]/50 border-l-4 border-l-[#22C55E]'
                         : isCompleted
                         ? 'bg-[#111827] border-[#1F2937] opacity-75'
@@ -288,7 +323,7 @@ export const Dashboard: React.FC = () => {
                               {item.subject_code}
                             </span>
                           )}
-                          {isOngoing && (
+                          {isHighlighted && (
                             <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-[#166534] text-white">
                               Ongoing
                             </span>
@@ -323,12 +358,12 @@ export const Dashboard: React.FC = () => {
                       </div>
 
                       <div className="text-left sm:text-right shrink-0">
-                        {isOngoing && (
+                        {isHighlighted && (
                           <span className="inline-block text-xs font-semibold text-[#4ADE80]">
                             {item.remainingMinutes}m left
                           </span>
                         )}
-                        {!isOngoing && item.startsInMinutes !== undefined && item.startsInMinutes > 0 && (
+                        {!isHighlighted && item.startsInMinutes !== undefined && item.startsInMinutes > 0 && (
                           <span className="inline-flex items-center space-x-1 text-xs font-normal text-[#9CA3AF]">
                             <Clock className="w-3.5 h-3.5 text-[#6B7280]" />
                             <span>in {item.startsInMinutes}m</span>
