@@ -24,7 +24,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onCloseMobile }) => {
     { to: '/dashboard', label: 'Today Schedule', icon: LayoutDashboard },
     { to: '/timetable', label: 'Weekly Timetable', icon: CalendarDays },
     { to: '/select-section', label: 'Department / Section', icon: Layers },
-    { to: '/notifications', label: 'WhatsApp & SMS Alerts', icon: Bell },
+    { to: '/notifications', label: 'Notifications', icon: Bell },
     { to: '/profile', label: 'Profile & Quick Setup', icon: User },
   ];
 

@@ -423,11 +423,7 @@ export const Dashboard: React.FC = () => {
           >
             <Bell className="w-4 h-4 text-[#6B7280]" />
             <span>
-              {preferences?.enabled
-                ? preferences?.whatsapp_enabled
-                  ? 'WhatsApp Alerts On'
-                  : 'Alerts On'
-                : 'Setup Alerts'}
+              {preferences?.enabled ? 'Alerts On' : 'Setup Alerts'}
             </span>
           </Link>
         </div>

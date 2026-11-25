@@ -3,8 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import { useTimetable } from '../context/TimetableContext';
 import { useNotification } from '../context/NotificationContext';
 import {
-  MessageCircle,
-  Smartphone,
   Upload,
   Bell,
   ChevronRight,
@@ -16,16 +14,10 @@ import { Link } from 'react-router-dom';
 export const Profile: React.FC = () => {
   const { user, completeOnboarding } = useAuth();
   const { departments, sections, selectedSection } = useTimetable();
-  const { preferences, toggleMasterNotifications, updatePreferences } = useNotification();
+  const { preferences, toggleMasterNotifications } = useNotification();
 
   const [editingName, setEditingName] = useState(false);
   const [fullName, setFullName] = useState(user?.full_name || 'Aarav Sharma');
-  const [whatsappNumber, setWhatsappNumber] = useState(
-    preferences?.whatsapp_number || user?.whatsapp_number || '+91 98765 43210'
-  );
-  const [smsNumber, setSmsNumber] = useState(
-    preferences?.sms_number || user?.phone_number || ''
-  );
   const [savedMsg, setSavedMsg] = useState('');
 
   const currentDept = departments.find((d) => d.id === selectedSection?.department_id);
@@ -36,21 +28,10 @@ export const Profile: React.FC = () => {
       fullName: fullName.trim(),
       departmentId: user?.department_id || departments[0]?.id || '',
       semester: user?.semester || 6,
-      sectionId: user?.section_id || sections[0]?.id || '',
-      phoneNumber: smsNumber,
-      whatsappNumber
+      sectionId: user?.section_id || sections[0]?.id || ''
     });
     setEditingName(false);
     setSavedMsg('Profile updated.');
-    setTimeout(() => setSavedMsg(''), 2500);
-  };
-
-  const handleSaveChannels = async () => {
-    await updatePreferences({
-      whatsapp_number: whatsappNumber,
-      sms_number: smsNumber
-    });
-    setSavedMsg('Notification numbers saved.');
     setTimeout(() => setSavedMsg(''), 2500);
   };
 
@@ -72,34 +53,7 @@ export const Profile: React.FC = () => {
         </div>
       )}
 
-      {/* 1. TOP BANNER: Connect with service for notifications (matches Image 2 top box) */}
-      <Link
-        to="/notifications"
-        className="block bg-[#111827] rounded-2xl border border-[#1F2937] p-4 hover:border-[#60A5FA] transition-colors"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-[#166534] text-white flex items-center justify-center shrink-0">
-              <MessageCircle className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[#F9FAFB]">
-                Connect with Notification Service
-              </p>
-              <p className="text-xs text-[#9CA3AF]">
-                {preferences?.enabled
-                  ? preferences?.whatsapp_enabled
-                    ? 'WhatsApp reminders active (SMS fallback optional)'
-                    : 'Browser Push / SMS reminders configured'
-                  : 'Connect WhatsApp (Recommended) or SMS for lecture alerts'}
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-[#9CA3AF] shrink-0" />
-        </div>
-      </Link>
-
-      {/* 2. CIRCULAR PROFILE AVATAR + PROFILE NAME (matches Image 2 center circle) */}
+      {/* Circular Profile Avatar + Profile Name */}
       <div className="py-3 flex flex-col items-center text-center space-y-2">
         <div className="w-20 h-20 rounded-full bg-[#2563EB] text-white flex items-center justify-center font-bold text-2xl border-4 border-[#111827] shadow-sm">
           {fullName ? fullName.charAt(0).toUpperCase() : 'S'}
@@ -110,7 +64,7 @@ export const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. STACKED CLEAN CARDS (matches Image 2's 4 stacked rounded boxes) */}
+      {/* Stacked Clean Cards */}
       <div className="space-y-3">
 
         {/* Row 1: User Name */}
@@ -190,14 +144,14 @@ export const Profile: React.FC = () => {
           </div>
         </Link>
 
-        {/* Row 4: Notification (ON / OFF) Toggle Button + WhatsApp / SMS */}
-        <div className="bg-[#111827] rounded-2xl border border-[#1F2937] p-4 space-y-4">
+        {/* Row 4: 1-Click Web/PWA Push Notification Toggle */}
+        <div className="bg-[#111827] rounded-2xl border border-[#1F2937] p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Bell className="w-4 h-4 text-[#60A5FA] shrink-0" />
               <div>
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA3AF] block">
-                  Lecture Notifications
+                  Push Notifications
                 </span>
                 <p className="text-sm font-semibold text-[#F9FAFB] mt-0.5">
                   {preferences?.enabled ? 'Notifications Enabled' : 'Notifications Off'}
@@ -221,73 +175,6 @@ export const Profile: React.FC = () => {
                 }`}
               />
             </button>
-          </div>
-
-          {/* Messaging Channels: WhatsApp prioritized over SMS */}
-          <div className="pt-3 border-t border-[#1F2937] space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center space-x-2">
-                <MessageCircle className="w-4 h-4 text-[#60A5FA]" />
-                <span className="font-semibold text-[#F9FAFB]">WhatsApp Alerts (Primary)</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={preferences?.whatsapp_enabled || false}
-                onChange={(e) => updatePreferences({ whatsapp_enabled: e.target.checked })}
-                className="w-4 h-4 accent-[#2563EB] rounded"
-              />
-            </div>
-
-            {preferences?.whatsapp_enabled && (
-              <div className="flex items-center space-x-2">
-                <input
-                  type="tel"
-                  placeholder="WhatsApp number (+91 ...)"
-                  value={whatsappNumber}
-                  onChange={(e) => setWhatsappNumber(e.target.value)}
-                  className="flex-1 px-3 py-1.5 border border-[#1F2937] rounded-lg text-xs bg-[#0B1120] text-[#F9FAFB] focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveChannels}
-                  className="px-3 py-1.5 rounded-lg bg-[#2563EB] text-white text-xs font-semibold hover:bg-[#1D4ED8]"
-                >
-                  Save
-                </button>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between text-xs pt-1">
-              <div className="flex items-center space-x-2">
-                <Smartphone className="w-4 h-4 text-[#60A5FA]" />
-                <span className="font-medium text-[#9CA3AF]">SMS Fallback (Optional)</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={preferences?.sms_enabled || false}
-                onChange={(e) => updatePreferences({ sms_enabled: e.target.checked })}
-                className="w-4 h-4 accent-[#2563EB] rounded"
-              />
-            </div>
-
-            {preferences?.sms_enabled && (
-              <div className="flex items-center space-x-2">
-                <input
-                  type="tel"
-                  placeholder="SMS mobile number (+91 ...)"
-                  value={smsNumber}
-                  onChange={(e) => setSmsNumber(e.target.value)}
-                  className="flex-1 px-3 py-1.5 border border-[#1F2937] rounded-lg text-xs bg-[#0B1120] text-[#F9FAFB] focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveChannels}
-                  className="px-3 py-1.5 rounded-lg bg-[#2563EB] text-white text-xs font-semibold hover:bg-[#1D4ED8]"
-                >
-                  Save
-                </button>
-              </div>
-            )}
           </div>
         </div>
 

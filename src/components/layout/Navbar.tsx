@@ -64,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, sidebarOpen }) 
             {isNotificationsEnabled ? (
               <>
                 <Bell className="w-3.5 h-3.5 text-white" />
-                <span>{preferences?.whatsapp_enabled ? 'WhatsApp On' : 'Alerts On'}</span>
+                <span>Alerts On</span>
               </>
             ) : (
               <>

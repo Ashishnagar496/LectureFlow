@@ -5,8 +5,6 @@ import {
   BellOff,
   Clock,
   Moon,
-  Smartphone,
-  MessageCircle,
   Send,
   CheckCircle2,
   AlertCircle,
@@ -24,9 +22,7 @@ export const NotificationSettings: React.FC = () => {
     sendTestAlert
   } = useNotification();
 
-  const [whatsappNumber, setWhatsappNumber] = useState(preferences?.whatsapp_number || '+91 98765 43210');
-  const [smsNumber, setSmsNumber] = useState(preferences?.sms_number || '');
-  const [testingChannel, setTestingChannel] = useState<string | null>(null);
+  const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
 
   const isEnabled = preferences?.enabled || false;
@@ -40,25 +36,17 @@ export const NotificationSettings: React.FC = () => {
     }
   };
 
-  const handleTest = async (channel: 'browser_push' | 'whatsapp' | 'sms') => {
-    setTestingChannel(channel);
+  const handleTestPush = async () => {
+    setTesting(true);
     setTestResult(null);
     try {
-      const res = await sendTestAlert(channel);
+      const res = await sendTestAlert('browser_push');
       setTestResult({ success: true, msg: res.preview });
     } catch (e: any) {
       setTestResult({ success: false, msg: e.message || 'Failed to send test notification.' });
     } finally {
-      setTestingChannel(null);
+      setTesting(false);
     }
-  };
-
-  const handleSaveNumbers = async () => {
-    await updatePreferences({
-      whatsapp_number: whatsappNumber,
-      sms_number: smsNumber
-    });
-    setTestResult({ success: true, msg: 'Messaging phone numbers saved.' });
   };
 
   return (
@@ -67,13 +55,13 @@ export const NotificationSettings: React.FC = () => {
       <div className="pb-3 border-b border-[#1F2937]">
         <div className="flex items-center space-x-2 text-[#9CA3AF] text-xs font-semibold uppercase tracking-wider mb-1">
           <Bell className="w-4 h-4 text-[#60A5FA]" />
-          <span>Alerts &amp; Messaging</span>
+          <span>Push Reminders</span>
         </div>
         <h1 className="text-2xl font-bold text-[#F9FAFB]">
           Notification Settings
         </h1>
         <p className="text-xs text-[#9CA3AF] mt-0.5">
-          WhatsApp is prioritized as the primary messaging channel, with optional SMS fallback and free Browser Push alerts.
+          Free, 1-click browser &amp; mobile PWA push notifications before every class.
         </p>
       </div>
 
@@ -82,19 +70,19 @@ export const NotificationSettings: React.FC = () => {
           className={`p-4 rounded-xl border flex items-center space-x-3 text-xs sm:text-sm ${
             testResult.success
               ? 'bg-[#166534] border-[#166534] text-white'
-              : 'bg-red-500/10 border-red-500/30 text-red-300'
+              : 'bg-[#7F1D1D] border-[#991B1B] text-white'
           }`}
         >
           {testResult.success ? (
-            <CheckCircle2 className="w-4 h-4 text-[#60A5FA] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
           ) : (
-            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-white shrink-0" />
           )}
           <span>{testResult.msg}</span>
         </div>
       )}
 
-      {/* 1-Click Instant Activation (when OFF, Google-auth style simplicity) */}
+      {/* 1-Click Instant Activation */}
       {!isEnabled && (
         <div className="bg-[#111827] rounded-2xl border border-[#2563EB]/30 shadow-[0_0_0_1px_rgba(37,99,235,0.15)] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -102,7 +90,7 @@ export const NotificationSettings: React.FC = () => {
               Turn On Reminders in 1 Click
             </h2>
             <p className="text-xs text-[#9CA3AF]">
-              No account setup or forms required. Allow browser/device notifications once and get alerted 10 minutes before every class.
+              Allow browser/device notifications once and get alerted 10 minutes before every class.
             </p>
           </div>
           <button
@@ -188,150 +176,33 @@ export const NotificationSettings: React.FC = () => {
           </div>
         </div>
 
-        {/* Messaging Channels: WhatsApp > Browser Push > SMS */}
-        <div className="bg-[#111827] rounded-2xl border border-[#1F2937] p-5 sm:p-6 space-y-4">
-          <h3 className="text-sm font-bold text-[#F9FAFB] uppercase tracking-wide">
-            Notification Channels
-          </h3>
-
-          {/* 1. WhatsApp (Prioritized) */}
-          <div className="p-4 rounded-xl border border-[#1F2937] bg-[#111827] space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-start space-x-3">
-                <div className="p-2 rounded-lg bg-[#166534] text-[#60A5FA] border border-[#166534]">
-                  <MessageCircle className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h4 className="text-sm font-bold text-[#F9FAFB]">WhatsApp Reminders</h4>
-                    <span className="text-[10px] bg-[#166534] text-[#60A5FA] border border-[#166534] font-semibold px-2 py-0.5 rounded">
-                      Preferred
-                    </span>
-                  </div>
-                  <p className="text-xs text-[#9CA3AF] mt-0.5">
-                    Official Meta WhatsApp Cloud API utility templates before lectures start.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 self-end sm:self-center">
-                <input
-                  type="checkbox"
-                  checked={preferences?.whatsapp_enabled || false}
-                  onChange={(e) => updatePreferences({ whatsapp_enabled: e.target.checked })}
-                  className="w-4 h-4 accent-[#2563EB] rounded"
-                />
-                <button
-                  onClick={() => handleTest('whatsapp')}
-                  disabled={testingChannel === 'whatsapp'}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#111827] border border-[#1F2937] text-xs font-semibold text-[#F9FAFB] hover:bg-[#111827]"
-                >
-                  <Send className="w-3.5 h-3.5 text-[#60A5FA]" />
-                  <span>{testingChannel === 'whatsapp' ? 'Preparing...' : 'Test WhatsApp'}</span>
-                </button>
-              </div>
+        {/* Browser & Mobile PWA Push */}
+        <div className="bg-[#111827] rounded-2xl border border-[#1F2937] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start space-x-3">
+            <div className="p-2 rounded-lg bg-[#0B1120] text-[#60A5FA] border border-[#1F2937]">
+              <Bell className="w-4 h-4" />
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 pt-1">
-              <input
-                type="tel"
-                placeholder="WhatsApp Number (+91 98765 43210)"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
-                className="flex-1 px-3 py-1.5 border border-[#1F2937] rounded-lg text-xs bg-[#111827] focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-              />
-              <button
-                onClick={handleSaveNumbers}
-                className="px-3.5 py-1.5 rounded-lg bg-[#2563EB] text-white text-xs font-semibold hover:bg-[#1D4ED8]"
-              >
-                Save Number
-              </button>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h4 className="text-sm font-bold text-[#F9FAFB]">Browser &amp; Mobile PWA Push</h4>
+                <span className="text-[10px] bg-[#166534] text-white font-medium px-2 py-0.5 rounded">
+                  Free &bull; Instant
+                </span>
+              </div>
+              <p className="text-xs text-[#9CA3AF] mt-0.5">
+                Browser permission status: <strong className="text-[#F9FAFB] capitalize">{permissionStatus}</strong>.
+              </p>
             </div>
           </div>
 
-          {/* 2. SMS Fallback */}
-          <div className="p-4 rounded-xl border border-[#1F2937] bg-[#111827] space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-start space-x-3">
-                <div className="p-2 rounded-lg bg-[#111827] text-[#60A5FA] border border-[#1F2937]">
-                  <Smartphone className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h4 className="text-sm font-bold text-[#F9FAFB]">SMS Alerts</h4>
-                    <span className="text-[10px] bg-[#111827] text-[#9CA3AF] font-medium px-2 py-0.5 rounded">
-                      Optional Fallback
-                    </span>
-                  </div>
-                  <p className="text-xs text-[#9CA3AF] mt-0.5">
-                    Delivered via Android SMS gateway or official SMS provider when WhatsApp is unavailable.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 self-end sm:self-center">
-                <input
-                  type="checkbox"
-                  checked={preferences?.sms_enabled || false}
-                  onChange={(e) => updatePreferences({ sms_enabled: e.target.checked })}
-                  className="w-4 h-4 accent-[#2563EB] rounded"
-                />
-                <button
-                  onClick={() => handleTest('sms')}
-                  disabled={testingChannel === 'sms'}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#111827] border border-[#1F2937] text-xs font-semibold text-[#F9FAFB] hover:bg-[#111827]"
-                >
-                  <Send className="w-3.5 h-3.5 text-[#60A5FA]" />
-                  <span>{testingChannel === 'sms' ? 'Preparing...' : 'Test SMS'}</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 pt-1">
-              <input
-                type="tel"
-                placeholder="SMS Mobile Number (+91 ...)"
-                value={smsNumber}
-                onChange={(e) => setSmsNumber(e.target.value)}
-                className="flex-1 px-3 py-1.5 border border-[#1F2937] rounded-lg text-xs bg-[#111827] focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-              />
-              <button
-                onClick={handleSaveNumbers}
-                className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#1F2937] text-[#F9FAFB] text-xs font-semibold hover:bg-[#111827]"
-              >
-                Save Number
-              </button>
-            </div>
-          </div>
-
-          {/* 3. Browser Web Push */}
-          <div className="p-4 rounded-xl border border-[#1F2937] bg-[#111827] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 rounded-lg bg-[#111827] text-[#60A5FA] border border-[#1F2937]">
-                <Bell className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <h4 className="text-sm font-bold text-[#F9FAFB]">Browser &amp; Mobile Push</h4>
-                  <span className="text-[10px] bg-[#111827] text-[#60A5FA] font-medium px-2 py-0.5 rounded">
-                    Free &bull; Instant
-                  </span>
-                </div>
-                <p className="text-xs text-[#9CA3AF] mt-0.5">
-                  Browser permission status: <strong className="text-[#F9FAFB] capitalize">{permissionStatus}</strong>.
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleTest('browser_push')}
-              disabled={testingChannel === 'browser_push'}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#111827] border border-[#1F2937] text-xs font-semibold text-[#F9FAFB] hover:bg-[#111827] self-end sm:self-center"
-            >
-              <Send className="w-3.5 h-3.5 text-[#60A5FA]" />
-              <span>{testingChannel === 'browser_push' ? 'Sending...' : 'Test Push'}</span>
-            </button>
-          </div>
+          <button
+            onClick={handleTestPush}
+            disabled={testing}
+            className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-[#2563EB] text-white text-xs font-semibold hover:bg-[#1D4ED8] self-end sm:self-center"
+          >
+            <Send className="w-3.5 h-3.5 text-white" />
+            <span>{testing ? 'Sending...' : 'Send Test Push'}</span>
+          </button>
         </div>
 
         {/* Quiet Hours */}
@@ -344,21 +215,21 @@ export const NotificationSettings: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-brand-text mb-1">Start (Evening)</label>
+              <label className="block text-xs font-medium text-[#9CA3AF] mb-1">Start (Evening)</label>
               <input
                 type="time"
                 value={preferences?.quiet_hours_start || '22:00'}
                 onChange={(e) => updatePreferences({ quiet_hours_start: e.target.value })}
-                className="w-full px-3 py-2 border border-[#1F2937] rounded-xl text-sm bg-brand-bg focus:bg-[#111827] focus:outline-none"
+                className="w-full px-3 py-2 border border-[#1F2937] rounded-xl text-sm bg-[#0B1120] text-[#F9FAFB] focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-brand-text mb-1">End (Morning)</label>
+              <label className="block text-xs font-medium text-[#9CA3AF] mb-1">End (Morning)</label>
               <input
                 type="time"
                 value={preferences?.quiet_hours_end || '07:00'}
                 onChange={(e) => updatePreferences({ quiet_hours_end: e.target.value })}
-                className="w-full px-3 py-2 border border-[#1F2937] rounded-xl text-sm bg-brand-bg focus:bg-[#111827] focus:outline-none"
+                className="w-full px-3 py-2 border border-[#1F2937] rounded-xl text-sm bg-[#0B1120] text-[#F9FAFB] focus:outline-none"
               />
             </div>
           </div>
@@ -381,7 +252,7 @@ export const NotificationSettings: React.FC = () => {
         {logs.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-brand-bg text-[#9CA3AF] border-b border-[#1F2937]">
+              <thead className="bg-[#0B1120] text-[#9CA3AF] border-b border-[#1F2937]">
                 <tr>
                   <th className="p-3">Time</th>
                   <th className="p-3">Channel</th>
@@ -389,17 +260,17 @@ export const NotificationSettings: React.FC = () => {
                   <th className="p-3">Message</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-brand-border">
+              <tbody className="divide-y divide-[#1F2937]">
                 {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-[#111827]/50">
-                    <td className="p-3 font-mono text-brand-text whitespace-nowrap">
+                  <tr key={log.id} className="hover:bg-[#1F2937]/40">
+                    <td className="p-3 font-mono text-[#F9FAFB] whitespace-nowrap">
                       {new Date(log.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td className="p-3 font-semibold capitalize text-[#F9FAFB]">
                       {log.channel.replace('_', ' ')}
                     </td>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#111827] text-[#F9FAFB] border border-[#1F2937]">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#2563EB] text-white">
                         {log.delivery_status}
                       </span>
                     </td>
@@ -413,7 +284,7 @@ export const NotificationSettings: React.FC = () => {
           </div>
         ) : (
           <p className="py-4 text-center text-xs text-[#9CA3AF]">
-            No notification activity yet. Use the test buttons above to preview alerts.
+            No notification activity yet. Click &ldquo;Send Test Push&rdquo; above to preview alerts.
           </p>
         )}
       </div>

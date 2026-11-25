@@ -3,19 +3,18 @@ import { useAuth } from '../context/AuthContext';
 import { useTimetable } from '../context/TimetableContext';
 import { useNotification } from '../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, School, BookOpen, Layers, MessageCircle, ArrowRight } from 'lucide-react';
+import { GraduationCap, School, BookOpen, Layers, ArrowRight } from 'lucide-react';
 
 export const Onboarding: React.FC = () => {
   const { user, completeOnboarding } = useAuth();
   const { departments, sections } = useTimetable();
-  const { toggleMasterNotifications, updatePreferences } = useNotification();
+  const { toggleMasterNotifications } = useNotification();
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [departmentId, setDepartmentId] = useState(departments[0]?.id || '11111111-1111-1111-1111-111111111111');
   const [semester, setSemester] = useState(6);
   const [sectionId, setSectionId] = useState(sections[0]?.id || 'a1111111-1111-1111-1111-111111111111');
-  const [whatsappNumber, setWhatsappNumber] = useState('');
   const [enableAlerts, setEnableAlerts] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -33,16 +32,12 @@ export const Onboarding: React.FC = () => {
         fullName,
         departmentId,
         semester,
-        sectionId: chosenSectionId,
-        whatsappNumber
+        sectionId: chosenSectionId
       });
 
       if (enableAlerts) {
         try {
           await toggleMasterNotifications(true);
-          if (whatsappNumber) {
-            await updatePreferences({ whatsapp_enabled: true, whatsapp_number: whatsappNumber });
-          }
         } catch {
           // Continue
         }
@@ -63,7 +58,7 @@ export const Onboarding: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold text-[#F9FAFB]">Student Onboarding</h1>
           <p className="text-xs text-[#9CA3AF] max-w-sm mx-auto">
-            Choose your department, section, and optional WhatsApp reminder number.
+            Choose your department, semester, and section to get started.
           </p>
         </div>
 
@@ -130,24 +125,10 @@ export const Onboarding: React.FC = () => {
             </select>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-brand-text mb-1 flex items-center space-x-1">
-              <MessageCircle className="w-3.5 h-3.5 text-[#60A5FA]" />
-              <span>WhatsApp Number (Optional, prioritized over SMS)</span>
-            </label>
-            <input
-              type="tel"
-              placeholder="+91 98765 43210"
-              value={whatsappNumber}
-              onChange={(e) => setWhatsappNumber(e.target.value)}
-              className="w-full px-3 py-2 border border-[#1F2937] rounded-xl text-sm bg-brand-bg focus:bg-[#111827] focus:outline-none"
-            />
-          </div>
-
           <div className="p-4 rounded-xl border border-[#1F2937] bg-brand-bg flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-[#F9FAFB] block">Enable Lecture Reminders</span>
-              <span className="text-[11px] text-[#9CA3AF]">10 minutes before class via WhatsApp / Push</span>
+              <span className="text-xs font-bold text-[#F9FAFB] block">Enable Browser Push Reminders</span>
+              <span className="text-[11px] text-[#9CA3AF]">Free alerts 10 minutes before class</span>
             </div>
             <input
               type="checkbox"
