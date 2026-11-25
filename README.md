@@ -18,7 +18,6 @@
   - Full Monday–Saturday grid on desktop and a clean day-by-day view on mobile.
 - **1-Click Lecture Notifications (Optional)**
   - **1-Click Enable**: Turn on instant browser/device push alerts (`5`, `10`, `15`, or `30` minutes before class) with quiet hours and duplicate prevention.
-  - **WhatsApp & SMS Ready**: Prioritizes Meta's official WhatsApp Business Cloud API with an optional SMS gateway fallback via Supabase Edge Functions (`supabase/functions/send-lecture-reminders`).
   - Works seamlessly as a timetable and timeline viewer even when all notifications are turned off.
 
 ## Tech Stack
